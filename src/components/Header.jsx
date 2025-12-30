@@ -7,7 +7,6 @@ const Header = () => {
       <div className="logo">Protégé IGDTUW</div>
       <nav className="nav">
         <a href="#">Home</a>
-        <a href="#">About</a>
         <a href="#">Team</a>
         <a href="#">Events</a>
         <a href="#">Mentorship</a>
