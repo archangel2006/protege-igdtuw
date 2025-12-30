@@ -1,109 +1,163 @@
-import React, { useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion'; // <--- The magic library
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Header from '../components/Header';
 import { teamSections } from '../data/teamData';
 import './Team.css';
 
 const Team = () => {
   const [activeTab, setActiveTab] = useState('core');
-  const currentSection = teamSections.find(section => section.id === activeTab);
-  const scrollRef = useRef(null);
 
-  // Scroll logic for Core carousel
-  const scrollCarousel = (direction) => {
-    if (scrollRef.current) {
-      const { current } = scrollRef;
-      const scrollAmount = 300;
-      direction === 'left' 
-        ? current.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
-        : current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
+  // Helper to find data
+  const coreSection = teamSections.find(s => s.id === 'core');
+  const currentSection = teamSections.find(s => s.id === activeTab);
+
+  // --- FILTERING LOGIC ---
+  let leftSidebarMembers = [];
+  let rightContentMembers = [];
+
+  if (activeTab === 'core') {
+    // CORE: Left = President & VP | Right = All Leads
+    leftSidebarMembers = coreSection?.members.filter(m => 
+      m.role.toLowerCase().includes('president')
+    ) || [];
+    
+    rightContentMembers = coreSection?.members.filter(m => 
+      !m.role.toLowerCase().includes('president')
+    ) || [];
+
+  } else {
+    // DEPARTMENTS: Left = Specific Lead | Right = Everyone else (EXCLUDING Leads)
+    
+    // 1. Identify the Lead for this section (usually found in Core or the section itself)
+    const leadKeywords = {
+      tech: 'tech lead',
+      management: 'management lead',
+      research: 'research lead',
+      media: 'media' 
+    };
+    const keyword = leadKeywords[activeTab];
+
+    // Try finding lead in Core first (as per your data structure)
+    const coreLeads = coreSection?.members.filter(m => 
+      m.role.toLowerCase().includes(keyword)
+    ) || [];
+
+    // If not in core, check current section
+    const sectionLeads = currentSection?.members.filter(m => 
+        m.role.toLowerCase().includes('lead')
+    ) || [];
+
+    leftSidebarMembers = [...coreLeads, ...sectionLeads];
+    // Remove duplicates if any
+    leftSidebarMembers = [...new Set(leftSidebarMembers)];
+
+    // 2. Get Right Members (Exclude anyone who is a Lead)
+    const rawMembers = currentSection?.members || [];
+    const nonLeads = rawMembers.filter(m => !m.role.toLowerCase().includes('lead'));
+
+    // 3. Sort Priority: Associate -> Head Coord -> Coord
+    const getPriority = (role) => {
+      const r = role.toLowerCase();
+      if (r.includes('associate')) return 1;
+      if (r.includes('head coordinator')) return 2;
+      return 3; 
+    };
+
+    rightContentMembers = nonLeads.sort((a, b) => 
+      getPriority(a.role) - getPriority(b.role)
+    );
+  }
 
   return (
     <>
       <Header />
-      <div className="team-page-container">
+      
+      <div className="team-container">
         
-        {/* HEADER WITH FADE IN */}
-        <motion.div 
-          className="team-header"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <h1 className="page-title">Meet the <span className="highlight">Team</span></h1>
-          <p className="page-subtitle">The architects of the future.</p>
-        </motion.div>
-
-        {/* GROUP PHOTO (Subtle scale in) */}
-        <motion.div 
-          className="group-photo-wrapper"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-           <img src="/team/group-photo.jpg" alt="Core Team" className="group-photo" onError={(e) => e.target.style.display = 'none'} />
-        </motion.div>
-
-        {/* --- ANIMATED SLIDING TABS --- */}
-        <div className="team-nav-container">
-          <div className="team-nav-scroll">
-            {teamSections.map((section) => (
-              <button 
-                key={section.id}
-                onClick={() => setActiveTab(section.id)}
-                className={`nav-box ${activeTab === section.id ? 'active' : ''}`}
-              >
-                {/* The "Floating Pill" Background */}
-                {activeTab === section.id && (
-                  <motion.div 
-                    layoutId="activeTab" 
-                    className="active-pill"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-                <span className="nav-text">{section.title.replace(" Team", "")}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* --- CONTENT AREA WITH STAGGERED ENTRANCE --- */}
-        <div className="team-content-area">
+        {/* --- LEFT STATIC SIDEBAR (TEAL) --- */}
+        <div className="left-panel">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab ? activeTab : "empty"}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
+            <motion.div 
+              key={activeTab}
+              className="left-content-wrapper"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.4 }}
             >
-              <section className="department-section">
-                
-                {currentSection && currentSection.id === 'core' ? (
-                  // CAROUSEL VIEW (Core)
-                  <div className="carousel-wrapper">
-                    <button className="nav-btn left-btn" onClick={() => scrollCarousel('left')}>&#8249;</button>
-                    <div className="carousel-container" ref={scrollRef}>
-                      {currentSection.members.map((member, idx) => (
-                        <TeamCard key={idx} member={member} index={idx} />
-                      ))}
+              {leftSidebarMembers.length > 0 ? (
+                leftSidebarMembers.map((member, idx) => (
+                  <div key={idx} className="profile-spotlight">
+                    <div className="spotlight-img">
+                      <img src={member.image} alt={member.name} onError={(e) => e.target.src="https://via.placeholder.com/200"}/>
                     </div>
-                    <button className="nav-btn right-btn" onClick={() => scrollCarousel('right')}>&#8250;</button>
+                    <h2 className="spotlight-name">{member.name}</h2>
+                    <p className="spotlight-role">{member.role}</p>
                   </div>
-                ) : (
-                  // GRID VIEW (Others)
-                  <div className="members-grid centered-grid">
-                    {currentSection && currentSection.members.map((member, idx) => (
-                       <TeamCard key={idx} member={member} index={idx} />
-                    ))}
-                  </div>
-                )}
-
-              </section>
+                ))
+              ) : (
+                // Fallback for empty left side
+                <div className="profile-spotlight">
+                   <h2 className="spotlight-name">{teamSections.find(s=>s.id===activeTab)?.title}</h2>
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
+        </div>
+
+        {/* --- RIGHT SCROLLABLE CONTENT (BLACK) --- */}
+        <div className="right-panel">
+          
+          <div className="right-header">
+            <h1 className="section-title">Meet the <span className="highlight">Team</span></h1>
+            
+            {/* NAVIGATION TABS */}
+            <div className="nav-tabs">
+              {teamSections.map((section) => (
+                <button 
+                  key={section.id}
+                  onClick={() => setActiveTab(section.id)}
+                  className={`tab-item ${activeTab === section.id ? 'active' : ''}`}
+                >
+                  {section.title.replace(" Team", "")}
+                  {activeTab === section.id && <motion.div layoutId="underline" className="active-line" />}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid-area">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* CORE TEAM GRID */}
+                {activeTab === 'core' && (
+                   <div className="members-grid">
+                      {rightContentMembers.map((member, idx) => (
+                        <TeamCard key={idx} member={member} />
+                      ))}
+                   </div>
+                )}
+
+                {/* DEPARTMENT GRID (Grouped) */}
+                {activeTab !== 'core' && (
+                  <div className="department-layout">
+                    {/* Associates */}
+                    {renderGroup(rightContentMembers, 'associate', 'Associates')}
+                    {/* Head Coordinators */}
+                    {renderGroup(rightContentMembers, 'head coordinator', 'Head Coordinators')}
+                    {/* Coordinators */}
+                    {renderGroup(rightContentMembers, 'coordinator', 'Coordinators')}
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
 
       </div>
@@ -111,37 +165,42 @@ const Team = () => {
   );
 };
 
-// --- NEW COMPONENT: THE HOLOGRAPHIC CARD ---
-const TeamCard = ({ member, index }) => {
+// Helper to render groups (prevents duplicate code)
+const renderGroup = (members, roleKeyword, title) => {
+  // Filter Logic: 
+  // If "coordinator", we must exclude "head coordinator" specifically
+  const group = members.filter(m => {
+    const r = m.role.toLowerCase();
+    if (roleKeyword === 'coordinator') {
+      return r.includes('coordinator') && !r.includes('head');
+    }
+    return r.includes(roleKeyword);
+  });
+
+  if (group.length === 0) return null;
+
   return (
-    <motion.div 
-      className="member-card"
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4, delay: index * 0.1 }} // Stagger effect
-      whileHover={{ y: -10 }} // Float up on hover
-    >
-      <div className="card-image-box">
-        <img 
-          src={member.image} 
-          alt={member.name} 
-          onError={(e) => e.target.src="https://via.placeholder.com/150"} 
-        />
-        {/* Overlay Effect */}
-        <div className="image-overlay"></div>
+    <div className="group-section">
+      <h3 className="group-title">{title}</h3>
+      <div className="members-grid">
+        {group.map((member, idx) => (
+          <TeamCard key={idx} member={member} />
+        ))}
       </div>
-      
-      <div className="card-info">
-        <h3>{member.name}</h3>
-        <p className="member-role">{member.role}</p>
-        
-        {/* Hidden LinkedIn Button that slides up */}
-        <a href={member.linkedin || "#"} className="linkedin-link">
-          Connect &rarr;
-        </a>
-      </div>
-    </motion.div>
+    </div>
   );
 };
+
+const TeamCard = ({ member }) => (
+  <motion.div className="team-card" whileHover={{ y: -5 }}>
+    <div className="card-img-circle">
+      <img src={member.image} alt={member.name} onError={(e) => e.target.src="https://via.placeholder.com/150"}/>
+    </div>
+    <div className="card-info">
+      <h4>{member.name}</h4>
+      <p>{member.role}</p>
+    </div>
+  </motion.div>
+);
 
 export default Team;

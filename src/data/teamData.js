@@ -1,5 +1,4 @@
 // Helper to categorize roles for sorting
-// 1 = Associate, 2 = Head Coordinator, 3 = Coordinator
 const getRolePriority = (role) => {
   if (role.toLowerCase().includes('associate')) return 1;
   if (role.toLowerCase().includes('head')) return 2;
@@ -25,38 +24,61 @@ export const teamSections = [
     id: "tech",
     title: "Technical Team",
     members: [
-      // Associates (First)
+      // REMOVED LEADS FROM HERE TO PREVENT DUPLICATION
+      
+      // Associates
       { name: "Annie Mathew", role: "Associate", image: "/team/Annie_Mathew.jpg" },
-      // Head Coordinators (Second)
+      // Head Coordinators
       { name: "Vaibhavi Srivastava", role: "Head Coordinator", image: "/team/Vaibhavi_Srivastava.jpg" },
       { name: "Ishika Manchanda", role: "Head Coordinator", image: "/team/Ishika_Manchanda.jpg" },
       { name: "Situ Kumari", role: "Head Coordinator", image: "/team/Situ_Kumari.jpg" },
-      // Coordinators (Third)
+      // Coordinators
       { name: "Reeva", role: "Coordinator", image: "/team/Reeva.jpg" },
       { name: "Yashvi", role: "Coordinator", image: "/team/Yashvi.jpg" },
       { name: "Tavleen Kaur", role: "Coordinator", image: "/team/Tavleen_Kaur.png" },
+      { name: "Yasha Singh", role: "Coordinator", image: "/team/Yasha_Singh.jpeg" },
     ].sort((a, b) => getRolePriority(a.role) - getRolePriority(b.role)) 
-    // ^ This .sort() automatically puts Associates first, then Head Coords, then Coords
   },
   {
     id: "research",
     title: "Research Team",
     members: [
-       { name: "Rakshita", role: "Head Coordinator", image: "/team/rakshita.jpg" },
-       { name: "Arya Chaturvedi", role: "Head Coordinator", image: "/team/arya.jpg" },
-       { name: "Mishti Jain", role: "Coordinator", image: "/team/mishti.jpg" },
-       { name: "Prachi Mann", role: "Coordinator", image: "/team/prachi.jpg" },
+       // Research leads were already missing here, which is why research looked fine
+       { name: "Anya Goyal", role: "Associate", image: "/team/Anya_Goyal.HEIC" },
+       { name: "Tanishka Arora", role: "Associate", image: "/team/Tanishka_Arora.jpg" },
+       { name: "Vaibhavi Srivastava", role: "Head Coordinator", image: "/team/Vaibhavi_Srivastava.jpg" },
+       { name: "Avanie Sharma", role: "Head Coordinator", image: "/team/Avanie_Sharma.jpg" },
+       { name: "Ananya Singh", role: "Coordinator", image: "/team/Ananya_Singh.jpg" },
+       { name: "Aviral", role: "Coordinator", image: "/team/Aviral.jpg" },
+       { name: "Swarnima Arora", role: "Coordinator", image: "/team/Swarnima_Arora.jpeg" },
+       { name: "Risha Rastogi", role: "Coordinator", image: "/team/Risha_Rastogi.jpeg" },
+       { name: "Palak Mishra", role: "Coordinator", image: "/team/Palak_Mishra.jpg" },
+       { name: "Prachi", role: "Coordinator", image: "/team/Prachi.jpeg" },
+       { name: "Aayushi Johri", role: "Coordinator", image: "/team/Aayushi_Johri.jpg" },
+       { name: "Harshita Purohit", role: "Coordinator", image: "/team/Harshita_Purohit.jpg" }
     ].sort((a, b) => getRolePriority(a.role) - getRolePriority(b.role))
   },
   {
     id: "management",
     title: "Management Team",
     members: [
-      { name: "Ananya Pal", role: "Associate", image: "/team/ananya-pal.jpg" },
-      { name: "Mehak Devgan", role: "Associate", image: "/team/mehak.jpg" },
-      { name: "Shalu Kumari", role: "Head Coordinator", image: "/team/shalu.jpg" },
-      { name: "Navya", role: "Head Coordinator", image: "/team/navya.jpg" },
-      { name: "Meghna Chauhan", role: "Coordinator", image: "/team/meghna.jpg" },
+      // REMOVED LEAD FROM HERE
+      { name: "Ananya Pal", role: "Associate", image: "/team/Ananya_Pal.HEIC" },
+      { name: "Mehak Devgan", role: "Associate", image: "/team/Mehak_Devgan.jpg" },
+      { name: "Shalu Kumari", role: "Head Coordinator", image: "/team/Shalu_Kumari.jpg" },
+      { name: "Navya", role: "Head Coordinator", image: "/team/Navya.jpg" },
+      { name: "Meghna Chauhan", role: "Coordinator", image: "/team/Meghna_Chauhan.jpg" },
+    ].sort((a, b) => getRolePriority(a.role) - getRolePriority(b.role))
+  },
+  {
+    id: "media",
+    title: "Media & PR",
+    members: [
+       // REMOVED LEAD FROM HERE
+       { name: "Rakshita", role: "Head Coordinator", image: "/team/Rakshita.jpg" },
+       { name: "Arya Chaturvedi", role: "Head Coordinator", image: "/team/Arya_Chaturvedi.jpg" },
+       { name: "Mishti Jain", role: "Coordinator", image: "/team/mishti.jpg" },
+       { name: "Prachi Mann", role: "Coordinator", image: "/team/prachi.jpg" },
     ].sort((a, b) => getRolePriority(a.role) - getRolePriority(b.role))
   }
 ];
