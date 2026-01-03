@@ -9,7 +9,9 @@ import Footer from "./components/Footer";
 import NeonCursor from "./components/NeonCursor";
 import GlitterCursor from "./components/GlitterCursor";
 import Mentorship from "./pages/mentorship";
+import ScrollToTop from "./components/ScrollToTop";
 import "./styles/theme.css";
+import "./styles/scrollAnimations.css";
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -26,6 +28,7 @@ function App() {
       <GlitterCursor />
 
       <Router>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/team" element={<Team />} />

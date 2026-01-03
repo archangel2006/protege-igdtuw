@@ -168,11 +168,51 @@ const FindMyMentorForm = ({ onClose }) => {
 
     setIsSubmitting(true);
     
-    // Simulate submission
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    setIsSubmitting(false);
-    setSubmitSuccess(true);
+    try {
+      // Prepare data for backend API
+      const menteeData = {
+        fullName: formData.fullName,
+        email: formData.email,
+        currentRole: 'Student', // Based on form context
+        dsaLevel: formData.dsaLevel === 'beginner' ? 'Beginner' : 
+                  formData.dsaLevel === 'intermediate' ? 'Intermediate' : 
+                  formData.dsaLevel === 'advanced' ? 'Advanced' : 'Intermediate',
+        preferredLanguage: 'Python', // Default - could be added to form
+        interestedTopics: formData.goals.map(goal => {
+          // Map goals to DSA topics
+          if (goal === 'internship') return 'Arrays & Strings';
+          if (goal === 'hackathons') return 'Dynamic Programming';
+          return 'Arrays & Strings'; // Default
+        }),
+        platforms: ['LeetCode'], // Default - could be based on form platform
+        goals: formData.mentorReason
+      };
+
+      // Call backend API
+      const response = await fetch('http://localhost:5000/api/mentees/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(menteeData)
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Store allocation result for success screen
+        setFormData(prev => ({ ...prev, allocationResult: result.data }));
+        setIsSubmitting(false);
+        setSubmitSuccess(true);
+      } else {
+        throw new Error(result.message || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      setIsSubmitting(false);
+      // Show error message
+      setErrors({ submit: error.message || 'Registration failed. Please try again.' });
+    }
   };
 
   const handleInputChange = (field, value) => {
@@ -217,16 +257,47 @@ const FindMyMentorForm = ({ onClose }) => {
   };
 
   if (submitSuccess) {
+    const allocationResult = formData.allocationResult;
+    const hasMentor = allocationResult?.mentor;
+    
     return (
       <div className="form-overlay">
         <div className="success-container">
           <div className="success-content">
             <div className="success-checkmark">✓</div>
-            <h2 className="success-title">Application Submitted!</h2>
-            <p className="success-message">
-              We'll review your profile and match you with 2-3 mentors within 24-48 hours.
-            </p>
-            <p className="success-email">Check your email: <span>{formData.email}</span></p>
+            <h2 className="success-title">
+              {hasMentor ? 'Mentor Allocated!' : 'Application Submitted!'}
+            </h2>
+            
+            {hasMentor ? (
+              <div className="mentor-details">
+                <p className="success-message">
+                  Great news! We've found you a perfect mentor match.
+                </p>
+                <div className="mentor-card">
+                  <h3>👨🏫 Your Mentor: {allocationResult.mentor.name}</h3>
+                  <p><strong>Expertise:</strong> {allocationResult.mentor.expertise}</p>
+                  <p><strong>Language:</strong> {allocationResult.mentor.language}</p>
+                  <p><strong>Topics:</strong> {allocationResult.mentor.topics?.join(', ')}</p>
+                  {allocationResult.mentor.profileUrl && (
+                    <a href={allocationResult.mentor.profileUrl} target="_blank" rel="noopener noreferrer" className="mentor-profile-link">
+                      View Profile →
+                    </a>
+                  )}
+                </div>
+                <p className="next-steps">
+                  📧 Check your email for mentor contact details and next steps.
+                </p>
+              </div>
+            ) : (
+              <div className="waiting-list">
+                <p className="success-message">
+                  You've been added to our priority waiting list. We'll match you with a mentor as soon as one becomes available.
+                </p>
+                <p className="success-email">We'll notify you at: <span>{formData.email}</span></p>
+              </div>
+            )}
+            
             <div className="success-buttons">
               <button className="success-btn primary" onClick={onClose}>Back to Home</button>
             </div>
@@ -278,6 +349,51 @@ const FindMyMentorForm = ({ onClose }) => {
           .success-email span {
             color: #20B2AA;
             font-weight: 600;
+          }
+          .mentor-details {
+            text-align: left;
+            max-width: 600px;
+            margin: 0 auto;
+          }
+          .mentor-card {
+            background: rgba(32, 178, 170, 0.1);
+            border: 2px solid rgba(32, 178, 170, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: left;
+          }
+          .mentor-card h3 {
+            color: #20B2AA;
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+          }
+          .mentor-card p {
+            color: #cbd5e1;
+            margin: 0.5rem 0;
+            font-size: 1rem;
+          }
+          .mentor-profile-link {
+            display: inline-block;
+            color: #20B2AA;
+            text-decoration: none;
+            margin-top: 1rem;
+            font-weight: 600;
+          }
+          .mentor-profile-link:hover {
+            text-decoration: underline;
+          }
+          .next-steps {
+            background: rgba(211, 225, 10, 0.1);
+            border: 1px solid rgba(211, 225, 10, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            color: #d3e10a;
+            text-align: center;
+            margin-top: 1rem;
+          }
+          .waiting-list {
+            text-align: center;
           }
           .success-buttons {
             display: flex;
@@ -787,13 +903,16 @@ const FindMyMentorForm = ({ onClose }) => {
                 <ChevronRight size={20} />
               </button>
             ) : (
-              <button 
-                className="nav-btn submit" 
-                onClick={handleSubmit}
-                disabled={!Object.values(formData.commitments).every(v => v) || !formData.finalCommitment}
-              >
-                ✍️ Sign & Submit
-              </button>
+              <div className="submit-section">
+                {errors.submit && <div className="submit-error">{errors.submit}</div>}
+                <button 
+                  className="nav-btn submit" 
+                  onClick={handleSubmit}
+                  disabled={!Object.values(formData.commitments).every(v => v) || !formData.finalCommitment}
+                >
+                  ✍️ Sign & Submit
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -1784,6 +1903,24 @@ const FindMyMentorForm = ({ onClose }) => {
         .section-indicator {
           color: rgba(255, 255, 255, 0.4);
           font-size: 0.9rem;
+        }
+
+        .submit-section {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .submit-error {
+          color: #ef4444;
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          border-radius: 8px;
+          padding: 0.75rem 1rem;
+          font-size: 0.9rem;
+          text-align: center;
+          animation: slideDown 0.3s ease;
         }
 
         /* Responsive */
