@@ -45,20 +45,20 @@ export const teamSections = [
         description: "Turning coffee into code and chaos into clarity."
       },
       { 
-        name: "Avwal Kaur", 
-        role: "Research Lead", 
-        image: "/team/Avwal_Kaur.jpeg",
-        branch: "CSE",
-        linkedin: "https://www.linkedin.com/in/avwal-kaur/",
-        description: "Trying to become better than yesterday..."
-      },
-      { 
         name: "Anjali Gupta", 
         role: "Research Lead", 
         image: "/team/Anjali_Gupta.jpeg",
         branch: "ECE-AI",
         linkedin: "https://www.linkedin.com/in/anjali-gupta-7985b2288?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
         description: "Curious, caffeinated, and trying my best.  "
+      },
+      { 
+        name: "Avwal Kaur", 
+        role: "Research Lead", 
+        image: "/team/Avwal_Kaur.jpeg",
+        branch: "CSE",
+        linkedin: "https://www.linkedin.com/in/avwal-kaur/",
+        description: "Trying to become better than yesterday..."
       },
       { 
         name: "Ananya Dwivedi", 
