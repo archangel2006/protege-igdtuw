@@ -11,13 +11,9 @@ const Header = () => {
       <nav className="nav">
         <Link to="/">Home</Link>
         <Link to="/team">Team</Link> 
-        <a href="#">Events</a>
-        <a href="#">Mentorship</a>
-          <Link to="/blogs">Blogs</Link>
-
         <Link to="/events">Events</Link>
         <Link to="/mentorship">Mentorship</Link>
-        <a href="#">Blogs</a>
+           <Link to="/blogs">Blogs</Link>
         <a href="#">FAQs</a>
       </nav>
     </header>
